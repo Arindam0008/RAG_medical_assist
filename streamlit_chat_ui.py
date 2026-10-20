@@ -12,8 +12,9 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # Chat input box
-# Walrus operator (:=) assigns input to user_query if provided
-if user_query := st.chat_input("Ask me something..."):
+st.title("🧠 AI Medical Assistant")
+user_query = st.text_input('Enter the query')
+if st.button("Enquire"):
 
     # Save user message
     st.session_state.messages.append({"role": "user", "content": user_query})
@@ -23,11 +24,10 @@ if user_query := st.chat_input("Ask me something..."):
         st.markdown(user_query)
 
     # Retrieve docs + generate response
-    retrieved_docs = retriever.get_relevant_documents(user_query)
-    # retriever.get_relevant_documents(user_query) returns a list of Document objects, not plain text.
-    # we should join their contents
-    retrieved_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
-    prompt = generate_prompt(retrieved_context, user_query)
+    docs = retriever.invoke(user_query)
+    context = "\n\n".join(doc.page_content for doc in docs)
+
+    prompt = generate_prompt(context, user_query)
     ai_output = generate_medical_advice(prompt)
 
     # Save assistant message
